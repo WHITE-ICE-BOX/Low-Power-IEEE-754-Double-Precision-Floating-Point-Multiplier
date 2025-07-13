@@ -1,0 +1,1 @@
+ncverilog -f run.f  //presim

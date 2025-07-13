@@ -1,0 +1,1 @@
+./01_run_low_power_syn  //synthesis

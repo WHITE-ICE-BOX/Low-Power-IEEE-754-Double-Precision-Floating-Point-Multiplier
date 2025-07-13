@@ -1,0 +1,1 @@
+ncverilog -f run.f  //post layout gate_level simulation

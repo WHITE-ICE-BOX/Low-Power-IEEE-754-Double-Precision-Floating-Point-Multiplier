@@ -1,0 +1,1 @@
+ncverilog -f run.f  //gate_level simulation
