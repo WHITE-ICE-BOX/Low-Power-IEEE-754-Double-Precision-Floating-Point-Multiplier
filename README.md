@@ -12,15 +12,8 @@
 - **路徑**：`RTL/Floating_Point_Number_Multiplier/`  
 - **內容**：  
   - 實現 64-bit IEEE-754 乘法器  
-  - 採用 Shift-and-Add 降低功耗  
-
-- **路徑**：`RTL/other/`  
-- **內容**：  
-  - `Gate_Level_Encoded_Multiplier`：實現閘級編碼技術  
-  - `Transformer_Attention_Unit`：針對注意力機制的硬體加速模組  
-  - `Sorting_the_Areas_of_Heptagons`：設計七邊形面積排序單元  
-  - `Coordinate_calculator`：三角形內部整數座標掃描與驗證 FSM  
-
+  - 採用 Shift-and-Add 降低功耗
+  - 
 ---
 
 ### 2. Synthesis
