@@ -13,7 +13,7 @@
 - **內容**：  
   - 實現 64-bit IEEE-754 乘法器  
   - 採用 Shift-and-Add 降低功耗
-  - 
+  
 ---
 
 ### 2. Synthesis
