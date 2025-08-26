@@ -1,0 +1,2 @@
+Calibre PEX 擷取寄生，重跑 STA 與 power analysis。
+Calibre DRC/LVS 最終簽核，輸出 GDSII、netlist、timing & power 報告。
