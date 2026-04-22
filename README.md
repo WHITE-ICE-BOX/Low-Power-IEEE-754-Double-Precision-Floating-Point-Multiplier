@@ -1,87 +1,109 @@
-# 🔬 Low-Power IEEE-754 Double Precision Floating Point Multiplier
+# Low-Power IEEE-754 Double-Precision Floating-Point Multiplier
 
-本專案實作 **64-bit IEEE-754 浮點數乘法器**，針對功耗進行深度優化。  
-原始 SPEC 為 **功耗低於 2 mW**，本設計採用 **Shift-and-Add 演算法** 取代平行乘法結構，  
-最終量測功耗 **0.7196 mW**，位居同儕 **前 1%**。  
+> 64-bit IEEE-754 Double-Precision FP Multiplier — Full RTL-to-GDSII ASIC Implementation
+> **Measured Power: 0.7196 mW (-64% vs. 2 mW target, Top 1% among peers)** @ 1 GHz
 
----
-
-## 📂 專案結構與內容介紹
-
-### 1. RTL 設計
-- **路徑**：`RTL/Floating_Point_Number_Multiplier/`  
-- **內容**：  
-  - 實現 64-bit IEEE-754 乘法器  
-  - 採用 Shift-and-Add 降低功耗
-  
----
-
-### 2. Synthesis
-- **路徑**：`Synthesis/`  
-- **內容**：  
-  - 使用 **Cadence Genus** 匯入 RTL 與 SDC  
-  - 設定 **1 GHz** 時脈，支援 **multi-corner / multi-mode (MCMM)**  
-  - 自動選用 **低功耗 standard cell**  
-  - 產生 **gate-level netlist**，並檢視初步 **面積 / 功耗報告**  
+![Status](https://img.shields.io/badge/Flow-RTL--to--GDSII-brightgreen)
+![Clock](https://img.shields.io/badge/Clock-1%20GHz-blue)
+![Power](https://img.shields.io/badge/Power-0.7196%20mW-success)
+![Standard](https://img.shields.io/badge/IEEE%20754-Compliant-orange)
 
 ---
 
-### 3. Gate-Level Netlist 驗證
-- **路徑**：`Netlist_syn/`  
-- **內容**：  
-  - 驗證 Synthesis 轉換後的 Gate-Level 電路是否正確  
-  - 確認正確後，進入 APR 階段  
+## Key Results
+
+| Metric | Value | Note |
+|--------|-------|------|
+| **Power** | **0.7196 mW** | **-64 % vs. 2 mW SPEC / Top 1 %** |
+| **Clock** | 1 GHz | Post-PnR Timing Closed |
+| **Standard** | IEEE-754 Double-Precision (64-bit) | Full compliance |
+| **Process** | TSMC N16 ADFP | Cell-based |
+| **Flow Coverage** | RTL → Synthesis → APR → Sign-off → GDSII | Independent, end-to-end |
+| **EDA** | Cadence (Genus / Innovus / Tempus / Verdi) · Siemens Calibre | |
 
 ---
 
-### 4. APR (Place & Route)
-- **路徑**：`innovus/`  
-- **內容**：  
-  - 使用 **Cadence Innovus** 完成：
-    - Floorplanning / I/O macro 佈局  
-    - Clock Tree Synthesis (CTS)  
-    - Placement & Routing  
-  - 搭配 **TCL / Optimus** 腳本，反覆修正 DRC/ERC  
+## Design Highlights
+
+- 🔧 **Shift-and-Add Architecture** — replaces parallel Wallace-tree multiplier, drastically reducing switching activity on the partial-product network.
+- ⚡ **Low-Power Techniques** — Clock Gating (ICG), Operand Isolation, Resource Sharing, Multi-Vt Cell Selection, Low-Power Synthesis.
+- 🎯 **Aggressive Timing Target** — 1 GHz post-route timing closed with MCMM (multi-corner / multi-mode).
+- ✅ **Clean Sign-off** — Calibre DRC / LVS / LPE Clean, post-layout simulation aligned with RTL.
+- 📊 **Quantified Verification** — RTL vs. Post-Layout netlist + SDF back-annotated functional / timing check.
 
 ---
 
-### 5. Netlist 驗證
-- **路徑**：`Netlist/`  
-- **內容**：  
-  - 在 APR 之後，驗證電路於 **延遲資訊 (delay info)** 下能否正常運作  
+## ASIC Flow
+
+```
+┌───────────┐   ┌───────────┐   ┌────────────┐   ┌─────────────┐   ┌─────────────┐   ┌────────┐
+│  Verilog  │──▶│  Genus    │──▶│  Gate-Level│──▶│   Innovus   │──▶│   Calibre   │──▶│ GDSII  │
+│    RTL    │   │ Synthesis │   │   Sim      │   │ APR + CTS   │   │ DRC/LVS/LPE │   │Sign-off│
+└───────────┘   └───────────┘   └────────────┘   └─────────────┘   └─────────────┘   └────────┘
+      │              │                                   │                  │
+   SDC/TCL       Low-Power                           Post-route          PEX +
+   Constraints   Optimization                        Hold ECO            STA
+```
+
+| Stage | Tool | Deliverable |
+|-------|------|-------------|
+| **RTL Design** | Verilog | Shift-and-Add IEEE-754 multiplier |
+| **Simulation** | NC-Verilog / Verdi / nWave | Functional verification |
+| **Synthesis** | Cadence Genus | Gate-level netlist, PPA report, MCMM setup |
+| **Gate-Level Sim** | NC-Verilog | Post-synthesis functional check |
+| **APR / PnR** | Cadence Innovus | Floorplan, CTS, Placement, Routing, Antenna / Hold ECO |
+| **Post-Layout Sim** | NC-Verilog + SDF | Timing-annotated verification |
+| **PEX / STA** | Calibre PEX + Tempus | Parasitic-aware timing / power analysis |
+| **Sign-off** | Siemens Calibre | DRC, LVS, LPE Clean — GDSII ready |
 
 ---
 
-### 6. DRC / LVS & PEX
-- **路徑**：`DRC,LVS`  
-- **內容**：  
-  - **Calibre PEX**：寄生擷取、STA、power analysis  
-  - **Calibre DRC/LVS**：最終簽核，輸出：  
-    - GDSII  
-    - Netlist  
-    - Timing & Power 報告  
+## Repository Structure
+
+```
+.
+├── RTL/Floating_Point_Number_Multiplier/   # 64-bit IEEE-754 Shift-and-Add RTL
+├── Synthesis/                              # Genus scripts, SDC constraints, reports
+├── Netlist_syn/                            # Post-synthesis gate-level netlist + sim
+├── innovus/                                # Innovus APR scripts (Floorplan / CTS / Route)
+├── Netlist/                                # Post-APR netlist + timing-annotated sim
+├── DRC,LVS/                                # Calibre DRC / LVS / LPE + GDSII
+└── RESULT/                                 # Final PPA reports + design documentation
+```
 
 ---
 
-### 7. 專案成果
-- **路徑**：`RESULT/`  
-- **內容**：  
-  - 程式碼整理 (Code Organization & Circuit Overview)  
-  - 功耗 / 面積 / 效能結果  
-  - 電路運作原理與程式設計細節  
+## Tools & Environment
+
+| Category | Tools |
+|----------|-------|
+| **RTL / Simulation** | Verilog, NC-Verilog, Verdi, nWave |
+| **Synthesis** | Cadence Genus |
+| **Physical Design** | Cadence Innovus |
+| **STA / Parasitic** | Cadence Tempus, Calibre PEX |
+| **Sign-off Verification** | Siemens Calibre (DRC / LVS / LPE) |
+| **Languages** | Verilog, SDC, TCL |
 
 ---
 
-## 🛠️ 使用工具與環境
-- **語言**：Verilog / SDC / TCL  
-- **模擬工具**：Cadence NC-Verilog, nWave, Verdi  
-- **綜合 (Synthesis)**：Cadence Genus  
-- **APR (Place & Route)**：Cadence Innovus  
-- **驗證**：Mentor Calibre (PEX, DRC/LVS)  
+## What Was Demonstrated
+
+This project demonstrates the ability to **independently drive a full ASIC front-end-to-GDSII flow**, with special emphasis on low-power datapath design:
+
+- Writing clean, synthesizable IEEE-754 compliant RTL.
+- Setting up SDC timing constraints (including MCMM and false-path handling).
+- Driving logic synthesis with explicit low-power optimization (ICG, operand isolation, resource sharing).
+- Executing Innovus APR with antenna-rule ECO and post-route hold fixing.
+- Calibre DRC / LVS / LPE sign-off, parasitic-aware STA, and post-layout simulation.
+- Producing reproducible PPA reports that survive reviewer scrutiny.
 
 ---
 
-## 📊 專案亮點
-- ✅ **低功耗設計**：功耗降至 **0.7196 mW**，優於原始 SPEC  
-- ✅ **多樣化子模組**：包含浮點乘法器、Transformer Attention、幾何計算單元  
-- ✅ **完整 ASIC Flow**：RTL → Synthesis → APR → DRC/LVS → GDSII  
+## Contact
+
+**Po-Chun Huang (黃柏鈞 / Barkie)** — Zhubei, Hsinchu, Taiwan
+📧 [barkie.huang@gmail.com](mailto:barkie.huang@gmail.com)
+🔗 GitHub: [WHITE-ICE-BOX](https://github.com/WHITE-ICE-BOX)
+
+> M.S. student at National Chung Cheng University CSIE, specializing in
+> digital IC front-end design and ASIC system integration.
